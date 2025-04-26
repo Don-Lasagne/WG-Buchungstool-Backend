@@ -25,6 +25,14 @@ void str_cat(string *dest, const char *src, size_t len) {
 }
 
 /**
+ * Appends a new line to given string
+ * @param dest string to append new line
+ */
+void str_append_new_line(string *dest) {
+    str_cat(dest, "\r\n", 2);
+}
+
+/**
  * Trennt den String anhand des Trennzeichens in mehrere Strings auf
  * @param str String der geteilt wird
  * @param seperator Trennzeichen

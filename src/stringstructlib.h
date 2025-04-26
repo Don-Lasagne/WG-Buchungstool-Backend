@@ -8,6 +8,8 @@ typedef struct stringstructlib {
 
 void str_cat(string *dest, const char *src, size_t len);
 
+void str_append_new_line(string *dest);
+
 string **str_split(string *str, char separator);
 
 string **str_split_at_index(string *str, int index);

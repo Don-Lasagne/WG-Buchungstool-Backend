@@ -26,6 +26,7 @@ typedef struct http_response {
     string *status_code;
     string *status_description;
     entity_header *entity_header;
+    string *location;
     string *body;
 } http_response;
 

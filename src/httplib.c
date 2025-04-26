@@ -201,7 +201,8 @@ short validate_file_access(char *filepath, unsigned int len) {
     return i;
 }
 
-/** takes the http_response struct and puts the contents into a string.
+/**
+ * takes the http_response struct and puts the contents into a string.
  * @param src the http_response struct
  * @return string with the contents of the src struct
  */
@@ -211,21 +212,33 @@ string *response_string(http_response *src) {
     str_cat(temp, src->status_code->str, src->status_code->len);
     str_cat(temp, " ", 1);
     str_cat(temp, src->status_description->str, src->status_description->len);
-    str_cat(temp, "\r\n", 2);
+    str_append_new_line(temp);
+
+    if (src->location != NULL && src->location->str != NULL) {
+        str_cat(temp, "Location: ", 10);
+        str_cat(temp, src->location->str, src->location->len);
+        str_append_new_line(temp);
+    }
     if (src->entity_header->content_type != NULL && src->entity_header->content_type->str != NULL) {
         str_cat(temp, "Content-Type: ", 14);
         str_cat(temp, src->entity_header->content_type->str, src->entity_header->content_type->len);
-        str_cat(temp, "\r\n", 2);
+        str_append_new_line(temp);
     }
-    str_cat(temp, "Content-Length: ", 16);
-    string *body_str = number_to_str(src->body->len);
-    str_cat(temp, body_str->str, body_str->len);
-    str_free(body_str);
-    str_cat(temp, "\r\n", 2);
+    if (src->body != NULL && src->body->str != NULL) {
+        str_cat(temp, "Content-Length: ", 16);
+        string *body_len_str = number_to_str(src->body->len);
+        str_cat(temp, body_len_str->str, body_len_str->len);
+        str_free(body_len_str);
+        str_append_new_line(temp);
 
-    //Set body
-    str_cat(temp, "\r\n", 2);
-    str_cat(temp, src->body->str, src->body->len);
+        //Set body
+        str_append_new_line(temp);
+        str_cat(temp, src->body->str, src->body->len);
+    } else {
+        str_cat(temp, "Content-Length: ", 16);
+        str_cat(temp, "0", 1);
+        str_append_new_line(temp);
+    }
     return temp;
 }
 

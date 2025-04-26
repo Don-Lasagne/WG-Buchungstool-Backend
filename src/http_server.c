@@ -226,56 +226,64 @@ string *process(string *request) {
                 return response_str;
             }
         }
-        string *get = char_to_string("GET");
         string *http_version = char_to_string("HTTP/1.1");
-        if (str_cmp(req->method, get) == 0 && req->uri->len > 0 &&
-            str_start_with_chars(req->uri, "/", strlen("/")) &&
-            req->uri->len < 256) {
-            //Get File
-            if (req->uri->len == 1) {
-                set_response_status(resp, char_to_string("308"), char_to_string("Permanent Redirect"));
-                resp->location = char_to_string(FRONTEND_LOCATION);
-            } else {
-                string *file_path = str_cpy(req->uri->str, req->uri->len);
+        if (req->uri->len > 0 && req->uri->len < 256 &&
+            str_start_with_chars(req->uri, "/", strlen("/"))) {
 
-                string *file;
-                switch (validate_file_access(file_path->str, (unsigned int) file_path->len)) {
-                    case 1: //File exists
-                        file = read_file_into_string(file_path->str, (unsigned int) file_path->len);
-                        if (file == NULL) {
-                            //Filepath is directory, not a file
+            string *get = char_to_string("GET");
+            string *post = char_to_string("POST");
+            if (str_equals(req->method, get)) {
+                //Get File
+                if (req->uri->len == 1) {
+                    set_response_status(resp, char_to_string("308"), char_to_string("Permanent Redirect"));
+                    resp->location = char_to_string(FRONTEND_LOCATION);
+                } else {
+                    string *file_path = str_cpy(req->uri->str, req->uri->len);
+
+                    string *file;
+                    switch (validate_file_access(file_path->str, (unsigned int) file_path->len)) {
+                        case 1: //File exists
+                            file = read_file_into_string(file_path->str, (unsigned int) file_path->len);
+                            if (file == NULL) {
+                                //Filepath is directory, not a file
+                                set_response_status(resp, char_to_string("404"), char_to_string("Not Found"));
+                                set_response_default_html_body(resp);
+                                break;
+                            }
+
+                        //Get File Type
+                            string **split_pathsplit_str = str_split(file_path, '.');
+                            int i = 0;
+                            for (i = 0; split_pathsplit_str[i]; ++i) {
+                                ;
+                            }
+                            string *ending = split_pathsplit_str[i - 1];
+                            for (int j = 0; j < i - 1; ++j) {
+                                str_print(split_pathsplit_str[j]);
+                                str_free(split_pathsplit_str[j]);
+                            }
+                            free(split_pathsplit_str);
+
+                            set_response_status(resp, char_to_string("200"), char_to_string("OK"));
+                            set_response_body(resp, file, get_content_type(ending));
+
+                            break;
+                        case 2: //File not found
                             set_response_status(resp, char_to_string("404"), char_to_string("Not Found"));
                             set_response_default_html_body(resp);
                             break;
-                        }
-
-                    //Get File Type
-                        string **split_pathsplit_str = str_split(file_path, '.');
-                        int i = 0;
-                        for (i = 0; split_pathsplit_str[i]; ++i) {
-                            ;
-                        }
-                        string *ending = split_pathsplit_str[i - 1];
-                        for (int j = 0; j < i - 1; ++j) {
-                            str_print(split_pathsplit_str[j]);
-                            str_free(split_pathsplit_str[j]);
-                        }
-                        free(split_pathsplit_str);
-
-                        set_response_status(resp, char_to_string("200"), char_to_string("OK"));
-                        set_response_body(resp, file, get_content_type(ending));
-
-                        break;
-                    case 2: //File not found
-                        set_response_status(resp, char_to_string("404"), char_to_string("Not Found"));
-                        set_response_default_html_body(resp);
-                        break;
-                    default: //File not in doc-root
-                        set_response_status(resp, char_to_string("403"), char_to_string("Forbidden"));
-                        set_response_default_html_body(resp);
-                        break;
+                        default: //File not in doc-root
+                            set_response_status(resp, char_to_string("403"), char_to_string("Forbidden"));
+                            set_response_default_html_body(resp);
+                            break;
+                    }
+                    str_free(file_path);
                 }
-                str_free(file_path);
+                str_free(get);
+                str_free(post);
+            } else if (str_equals(req->method, post)) {
+                set_response_status(resp, char_to_string("501"), char_to_string("Not Implemented"));
+                set_response_default_html_body(resp);
             }
         } else if (req->uri->len > 255) {
             set_response_status(resp, char_to_string("414"), char_to_string("URI too long"));
@@ -285,7 +293,6 @@ string *process(string *request) {
             set_response_default_html_body(resp);
         }
         response_str = response_string(resp);
-        str_free(get);
         str_free(http_version);
         free_request(req);
         free_response(resp);

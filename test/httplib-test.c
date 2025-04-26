@@ -37,6 +37,8 @@ static void str_to_lower_case_test(void);
 
 static void str_format_test(void);
 
+static void str_equals_test(void);
+
 int main(void) {
     str_cat_test_helloworld();
     str_decode_test_space();
@@ -54,6 +56,7 @@ int main(void) {
     add_null_terminator_test();
     str_to_lower_case_test();
     str_format_test();
+    str_equals_test();
     printf("INFO in file %s, line %d: All httplib tests passed successfully.\n", __FILE__, __LINE__);
     return 0;
 }
@@ -262,4 +265,11 @@ static void str_format_test(void) {
 
     str_free(unformatted);
     str_free(formatted);
+}
+
+static void str_equals_test(void) {
+    string *s1 = char_to_string("ABCDE");
+    string *s2 = char_to_string("ABCD");
+    assert(str_equals(s1,s2)==0);
+    assert(str_equals(s1,s1));
 }

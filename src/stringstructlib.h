@@ -48,5 +48,7 @@ void str_to_lower_case(string *str);
 
 void str_format(string *str);
 
+int str_equals(string *str1, string *str2);
+
 #endif //STRING_H
 

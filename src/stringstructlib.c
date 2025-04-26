@@ -246,17 +246,17 @@ void str_trim(string *str) {
 /** str_cmp implemented for string-struct without /0 Terminator
  * @param str1 first string to compare
  * @param str2 second string to compare
- * @return 0 if both strings are equal, -1 if not
+ * @return 0 if both strings are equal, difference if not
  */
 int str_cmp(string *str1, string *str2) {
     assert(str1 != NULL);
     assert(str2 != NULL);
     if (str1->len != str2->len) {
-        return -1;
+        return (int) str1->len - (int) str2->len;
     }
     for (unsigned int i = 0; i < str1->len; i++) {
         if (str1->str[i] != str2->str[i]) {
-            return -1;
+            return str1->str[i] - str2->str[i];
         }
     }
     return 0;
@@ -383,7 +383,7 @@ void str_format(string *str) {
             spaces++;
         }
     }
-    char *new_str = calloc(str->len-spaces, sizeof(char));
+    char *new_str = calloc(str->len - spaces, sizeof(char));
 
     unsigned int new_str_index = 0;
     for (unsigned int i = 0; i < str->len; ++i) {
@@ -393,5 +393,15 @@ void str_format(string *str) {
     }
     free(str->str);
     str->str = new_str;
-    str->len = str->len-spaces;
+    str->len = str->len - spaces;
+}
+
+/**
+ * Compares if two strings are equal
+ * @param str1 first string to compare
+ * @param str2 first string to compare
+ * @return 0 if false, 1 if true
+ */
+int str_equals(string *str1, string *str2) {
+    return str_cmp(str1, str2) == 0;
 }
